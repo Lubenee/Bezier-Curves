@@ -20,8 +20,8 @@ An OpenGL tool to create Bezier curves.
 1. Clone the repo:
 
    ```bash
-   git clone https://github.com/yourusername/bezier-curve-playground.git
-   cd bezier-curve-playground
+   git clone https://github.com/Lubenee/Bezier-Curves.git
+   cd Bezier-Curves
 
    ```
 
