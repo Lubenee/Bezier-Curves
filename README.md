@@ -27,8 +27,6 @@ An OpenGL tool to create Bezier curves.
 
 2. Build the project using your preferred IDE or CMake.
 
-3. Run the executable, and start adding or dragging points to create your own Bézier curves!
-
 ## Compatibility
 
     Works on Ubuntu with GCC 11.
