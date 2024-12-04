@@ -1,4 +1,5 @@
 #include "InputManager.hpp"
+#include "Utils.hpp"
 #include <iostream>
 #include <imgui_impl_glfw.h>
 #include <imgui.h>
@@ -15,7 +16,7 @@ void InputManager::setCallbacks()
     // Set the mouse callback
     glfwSetMouseButtonCallback(window, InputManager::mouseCallback);
     glfwSetCursorPosCallback(window, InputManager::cursorPositionCallback);
-    // glfwSetKeyCallback(window, InputManager::keyboardCallback);
+    glfwSetKeyCallback(window, InputManager::keyboardCallback);
 }
 
 void InputManager::mouseCallback(GLFWwindow *window, int button, int action, int mods)
@@ -56,6 +57,29 @@ void InputManager::mouseCallback(GLFWwindow *window, int button, int action, int
     }
 
     else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    { // TODO: remove a point
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+
+        InputManager *inputHandler = static_cast<InputManager *>(glfwGetWindowUserPointer(window));
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+        float worldX, worldY;
+        convertScreenToWorld(xpos, ypos, width, height, worldX, worldY);
+
+        // Check if the mouse is inside any existing point
+        for (std::size_t i = 0; i < inputHandler->vertexManager.controlPoints.size(); ++i)
+        {
+            const auto &point = inputHandler->vertexManager.controlPoints[i];
+            if (Utils::isPointBeingHovered(worldX, worldY, point.x, point.y))
+            {
+                inputHandler->vertexManager.draggedPointIndex = i;
+                break;
+            }
+        }
+    }
+
+    else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
     {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
@@ -67,29 +91,22 @@ void InputManager::mouseCallback(GLFWwindow *window, int button, int action, int
         convertScreenToWorld(xpos, ypos, width, height, worldX, worldY);
 
         // Check if the mouse is inside any existing point
-        for (std::size_t i = 0; i < inputHandler->vertexManager.points.size(); ++i)
+        for (std::size_t i = 0; i < inputHandler->vertexManager.controlPoints.size(); ++i)
         {
-            const auto &point = inputHandler->vertexManager.points[i];
-            if (point.isMouseOver(worldX, worldY))
+            const auto &point = inputHandler->vertexManager.controlPoints[i];
+            if (Utils::isPointBeingHovered(worldX, worldY, point.x, point.y))
             {
-                inputHandler->vertexManager.draggedPointIndex = i;
+                inputHandler->vertexManager.removePoint(i);
                 break;
             }
         }
-    }
-
-    else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-    {
-        // TODO: remove a point
     }
 }
 
 void InputManager::cursorPositionCallback(GLFWwindow *window, double xpos, double ypos)
 {
-    /*
-    used to forward the mouse movement (cursor pos) to ImGui from GLFW's native cursor position callback.
-    allows ImGui to correctly track the cursor's position in relation to any ImGui windows.
-    */
+    // used to forward the mouse movement (cursor pos) to ImGui from GLFW's native cursor position callback.
+    // allows ImGui to correctly track the cursor's position in relation to any ImGui windows.
     ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 
     InputManager *inputHandler = static_cast<InputManager *>(glfwGetWindowUserPointer(window));
@@ -105,7 +122,14 @@ void InputManager::cursorPositionCallback(GLFWwindow *window, double xpos, doubl
     }
 }
 
-void InputManager::keyboardCallback() {}
+void InputManager::keyboardCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_Z && mods == GLFW_MOD_CONTROL && action == GLFW_RELEASE)
+    {
+        // TODO: Implement a command stack.
+        std::cout << "Ctrl + Z" << std::endl;
+    }
+}
 
 // convert screen to world coordinates
 void InputManager::convertScreenToWorld(double xpos, double ypos, GLint windowWidth, GLint windowHeight, float &worldX, float &worldY)

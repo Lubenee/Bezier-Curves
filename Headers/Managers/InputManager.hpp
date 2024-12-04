@@ -20,7 +20,7 @@ public:
 private:
     static void mouseCallback(GLFWwindow *window, int button, int action, int mods);
     static void cursorPositionCallback(GLFWwindow *window, double xpos, double ypos);
-    static void keyboardCallback();
+    static void keyboardCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
     GLFWwindow *window;
     VertexManager &vertexManager;
