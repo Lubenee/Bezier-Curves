@@ -26,8 +26,11 @@ public:
 
     // Add a point to the list
     void addPoint(float x, float y);
+    void removePoint(std::size_t index);
 
     void translatePoint(float x, float y, std::size_t pointIndex);
+
+    void addImguiTabs();
 
     void renderPoints() const;
     void renderTransitionPoints() const;
@@ -37,9 +40,9 @@ public:
 private:
     void calculateBezierCurve(int segments);
 
-private:
-    std::vector<Vertex> points;
+    void recalculateAllVertices();
 
+private:
     std::vector<glm::vec2> controlPoints;
     std::vector<glm::vec2> transitionPoints;
     std::vector<glm::vec2> curvePoints;
@@ -47,6 +50,10 @@ private:
     float t = 0.5;
     const int highResNumSegments = 150;
     int lowResNumSegments = 25;
+
+    float controlPointsSize = 12.f;
+    float transitionPointsLineWidth = 3.5f;
+    float bezierCurveLineWidth = 2.5f;
 
     GLint draggedPointIndex;
     GLuint vao[vaoSets::Count];
