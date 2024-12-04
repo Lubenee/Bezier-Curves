@@ -49,17 +49,16 @@ namespace MathUtils
         return controlPointsCount + getTransitionPointsCount(--controlPointsCount);
     }
 
-    inline std::vector<glm::vec2> getBezierTransitionPoints(const std::vector<Vertex> &controlPoints, const float t)
+    inline std::vector<glm::vec2> getBezierTransitionPoints(const std::vector<glm::vec2> &controlPoints, const float t)
     {
         if (controlPoints.empty())
             return std::vector<glm::vec2>();
-        std::vector<glm::vec2> glmVec(controlPoints.begin(), controlPoints.end());
 
         std::vector<glm::vec2> retval;
-        retval.reserve(getTransitionPointsCount(glmVec.size()));
-        retval.insert(retval.end(), glmVec.begin(), glmVec.end());
+        retval.reserve(getTransitionPointsCount(controlPoints.size()));
+        retval.insert(retval.end(), controlPoints.begin(), controlPoints.end());
 
-        std::vector<glm::vec2> previousLevel = glmVec;
+        std::vector<glm::vec2> previousLevel = controlPoints;
         std::vector<glm::vec2> nextLevel;
 
         while (previousLevel.size() > 1)
