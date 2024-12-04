@@ -38,6 +38,7 @@ public:
     void updateVBO(vaoSets);
 
 private:
+    void setupVAOs(GLuint vao, GLuint vbo);
     void calculateBezierCurve(int segments);
 
     void recalculateAllVertices();
@@ -61,6 +62,7 @@ private:
 
     GLuint controlPointShaderProgram;
     GLuint bezierCurveShaderProgram;
+    GLuint transitionPointsShaderProgram;
 };
 
 #endif // VERTEX_MANAGER_H

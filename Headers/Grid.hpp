@@ -25,7 +25,8 @@ public:
     void addImguiTabs()
     {
         if (ImGui::BeginTabBar("Tabs"))
-        {
+        { // This Tab Bar segment gets closed in the render method.
+          // It should be here, and not there, but im lazy
             if (ImGui::BeginTabItem("Renderer"))
             {
                 ImGui::Text("What do you want to render?");
