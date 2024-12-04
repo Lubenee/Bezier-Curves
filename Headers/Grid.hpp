@@ -36,18 +36,15 @@ public:
 
                 ImGui::EndTabItem();
             }
-            if (ImGui::BeginTabItem("Camera"))
-            {
-                ImGui::Text("Cam Settings idk");
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
         }
     }
 
     void render()
     {
         addImguiTabs();
+        vertices.addImguiTabs();
+        ImGui::EndTabBar();
+
         if (renderControlPoints)
             vertices.renderPoints();
         if (renderTransitionPoints)
