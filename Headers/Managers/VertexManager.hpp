@@ -49,7 +49,7 @@ private:
     std::vector<glm::vec2> curvePoints;
 
     float t = 0.5;
-    const int highResNumSegments = 150;
+    int highResNumSegments = 150;
     int lowResNumSegments = 25;
 
     float controlPointsSize = 12.f;
@@ -59,6 +59,16 @@ private:
     GLint draggedPointIndex;
     GLuint vao[vaoSets::Count];
     GLuint vbo[vaoSets::Count];
+
+    // Oscilations stuff
+    GLuint waveAmplitudeLocation;
+    GLuint waveFrequencyLocation;
+    GLuint timeLocation;
+    GLuint pulseSpeedLocation;
+
+    float waveAmplitude;
+    float waveFrequency;
+    float pulseSpeed;
 
     GLuint controlPointShaderProgram;
     GLuint bezierCurveShaderProgram;

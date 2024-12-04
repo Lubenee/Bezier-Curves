@@ -19,6 +19,11 @@ VertexManager::VertexManager()
     setupVAOs(vao[vaoSets::ControlPoints], vbo[0]);
     setupVAOs(vao[vaoSets::TransitionPoints], vbo[1]);
     setupVAOs(vao[vaoSets::BezierCurve], vbo[2]);
+
+    waveAmplitudeLocation = glGetUniformLocation(bezierCurveShaderProgram, "waveAmplitude");
+    waveFrequencyLocation = glGetUniformLocation(bezierCurveShaderProgram, "waveFrequency");
+    timeLocation = glGetUniformLocation(bezierCurveShaderProgram, "time");
+    pulseSpeedLocation = glGetUniformLocation(bezierCurveShaderProgram, "pulseSpeed");
 }
 
 void VertexManager::setupVAOs(GLuint vao, GLuint vbo)
@@ -43,6 +48,17 @@ void VertexManager::addImguiTabs()
 {
     if (ImGui::BeginTabItem("Bezier curve"))
     {
+        if (ImGui::Button("Clear curve"))
+        {
+            controlPoints.clear();
+            transitionPoints.clear();
+            curvePoints.clear();
+            for (int i = 0; i < vaoSets::Count; ++i)
+                updateVBO(vaoSets(i));
+        }
+
+        ImGui::Separator();
+
         if (ImGui::SliderFloat("t", &this->t, 0.f, 1.f))
         {
             this->transitionPoints = MathUtils::getBezierTransitionPoints(controlPoints, t);
@@ -52,6 +68,24 @@ void VertexManager::addImguiTabs()
         ImGui::SliderFloat("Control Points Size", &this->controlPointsSize, 1.f, 20.f);
         ImGui::SliderFloat("Bezier Curve Line Width", &this->bezierCurveLineWidth, 1.f, 20.f);
         ImGui::SliderFloat("Transition Points Line Width", &this->transitionPointsLineWidth, 1.f, 20.f);
+
+        if (ImGui::SliderInt("Smoothness", &this->highResNumSegments, 10, 350))
+        {
+            calculateBezierCurve(highResNumSegments);
+            this->updateVBO(vaoSets::BezierCurve);
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("WARNING! WITH TOO MANY CONTROL POINTS, APPLICATION MIGHT CRASH IF YOU SET THE VALUE TOO HIGH.\nAdjust the smoothness of the Bezier curve. Higher values result in a smoother curve.");
+
+        ImGui::EndTabItem();
+    }
+    if (ImGui::BeginTabItem("Animate"))
+    {
+        ImGui::Text("Oscilations");
+        ImGui::Separator();
+        ImGui::SliderFloat("Wave Amplitude", &waveAmplitude, 0.f, 1.0f);
+        ImGui::SliderFloat("Wave Frequency", &waveFrequency, 0.f, 10.0f);
+        ImGui::SliderFloat("Pulse Speed", &pulseSpeed, 0.f, 5.0f);
 
         ImGui::EndTabItem();
     }
@@ -153,8 +187,15 @@ void VertexManager::renderTransitionPoints() const
 
 void VertexManager::renderCurve() const
 {
-    glUseProgram(controlPointShaderProgram);
+    glUseProgram(bezierCurveShaderProgram);
     glLineWidth(bezierCurveLineWidth);
+
+    float time = glfwGetTime();
+    glUniform1f(timeLocation, time);
+    glUniform1f(waveAmplitudeLocation, waveAmplitude);
+    glUniform1f(waveFrequencyLocation, waveFrequency);
+    glUniform1f(pulseSpeedLocation, pulseSpeed);
+
     glBindVertexArray(vao[VertexManager::vaoSets::BezierCurve]);
     glDrawArrays(GL_LINE_STRIP, 0, curvePoints.size());
     glBindVertexArray(0);

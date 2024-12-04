@@ -1,9 +1,24 @@
-#version 330 core
+#version 450 core
 
-in vec2 fragPosition;
-out vec4 color;
+out vec4 FragColor;
+uniform float time; 
+
+vec3 hsv2rgb(float h, float s, float v)
+{
+    float c = v * s;
+    float x = c * (1.0 - abs(mod(h * 6.0, 2.0) - 1.0));
+    float m = v - c;
+    vec3 rgb = (h < 1.0 / 6.0) ? vec3(c, x, 0) :
+               (h < 2.0 / 6.0) ? vec3(x, c, 0) :
+               (h < 3.0 / 6.0) ? vec3(0, c, x) :
+               (h < 4.0 / 6.0) ? vec3(0, x, c) :
+               (h < 5.0 / 6.0) ? vec3(x, 0, c) : vec3(c, 0, x);
+    return rgb + m;
+}
 
 void main()
 {
-    color = vec4(0.0, 1.0, 0.0, 1.0); // green
+    float hue = mod(time * 0.1, 1.0);
+    vec3 color = hsv2rgb(hue, 1.0, 1.0);
+    FragColor = vec4(color, 1.0);
 }
