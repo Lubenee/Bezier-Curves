@@ -45,7 +45,7 @@ private:
     std::vector<glm::vec2> curvePoints;
 
     float t = 0.5;
-    const int highResNumSegments = 110;
+    const int highResNumSegments = 150;
     int lowResNumSegments = 25;
 
     GLint draggedPointIndex;
