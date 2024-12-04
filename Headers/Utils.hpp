@@ -10,6 +10,7 @@
 
 namespace Utils
 {
+    constexpr float POINT_DRAG_THRESHHOLD = 0.02;
 
     inline std::string readShaderSource(const char *filePath)
     {
@@ -99,6 +100,12 @@ namespace Utils
         if (pointCount < 25)
             return 20;
         return 15;
+    }
+
+    inline bool isPointBeingHovered(float mouseX, float mouseY, float x, float y)
+    {
+        return mouseX >= x - POINT_DRAG_THRESHHOLD && mouseX <= x + POINT_DRAG_THRESHHOLD &&
+               mouseY >= y - POINT_DRAG_THRESHHOLD && mouseY <= y + POINT_DRAG_THRESHHOLD;
     }
 }
 
