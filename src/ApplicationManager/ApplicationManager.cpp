@@ -65,9 +65,15 @@ void ApplicationManager::update(double dt)
 void ApplicationManager::render()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-
+    imgui.setNextWindowContext();
     imgui.newFrame();
+    ImGui::Begin("Settings");
+    ImGui::Text("Frame Time: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Separator();
+
     grid->render();
+
+    ImGui::End();
     imgui.render();
 
     glfwSwapBuffers(window);

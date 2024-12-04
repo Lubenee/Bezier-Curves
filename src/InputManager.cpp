@@ -1,5 +1,7 @@
 #include "InputManager.hpp"
 #include <iostream>
+#include <imgui_impl_glfw.h>
+#include <imgui.h>
 
 InputManager::InputManager(GLFWwindow *window, VertexManager &vertexManager)
     : window(window), vertexManager(vertexManager)
@@ -16,9 +18,16 @@ void InputManager::setCallbacks()
     // glfwSetKeyCallback(window, InputManager::keyboardCallback);
 }
 
-// Static mouse callback function
 void InputManager::mouseCallback(GLFWwindow *window, int button, int action, int mods)
 {
+    auto &io = ImGui::GetIO();
+    // Forward the action to ImGui first to see if the user is clicking within the GUI itself
+    io.AddMouseButtonEvent(button, action);
+
+    // If the click is inside the GUI, discard mouse input
+    if (io.WantCaptureMouse)
+        return;
+
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
     {
         double xpos, ypos;
@@ -77,8 +86,13 @@ void InputManager::mouseCallback(GLFWwindow *window, int button, int action, int
 
 void InputManager::cursorPositionCallback(GLFWwindow *window, double xpos, double ypos)
 {
-    InputManager *inputHandler = static_cast<InputManager *>(glfwGetWindowUserPointer(window));
+    /*
+    used to forward the mouse movement (cursor pos) to ImGui from GLFW's native cursor position callback.
+    allows ImGui to correctly track the cursor's position in relation to any ImGui windows.
+    */
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 
+    InputManager *inputHandler = static_cast<InputManager *>(glfwGetWindowUserPointer(window));
     // if a point is being dragged, update its position
     if (inputHandler->vertexManager.draggedPointIndex != NO_DRAG)
     {

@@ -27,6 +27,8 @@ public:
      */
     void init(GLFWwindow *window);
 
+    void setNextWindowContext();
+
     /**
      * @brief Prepares a new ImGui frame.
      *
