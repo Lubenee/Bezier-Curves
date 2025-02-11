@@ -17,6 +17,8 @@ public:
         ControlPoints = 0,
         TransitionPoints,
         BezierCurve,
+        Hodograph,
+        HodographControlPoints,
         Count
     };
     friend class InputManager;
@@ -27,19 +29,21 @@ public:
     // Add a point to the list
     void addPoint(float x, float y);
     void removePoint(std::size_t index);
-
     void translatePoint(float x, float y, std::size_t pointIndex);
 
+    void updateVBO(vaoSets);
     void addImguiTabs();
 
     void renderPoints() const;
     void renderTransitionPoints() const;
     void renderCurve() const;
-    void updateVBO(vaoSets);
+    void renderHodograph() const;
+    void renderHodographControlPoints() const;
 
 private:
     void setupVAOs(GLuint vao, GLuint vbo);
     void calculateBezierCurve(int segments);
+    void calculateHodograph();
 
     void recalculateAllVertices();
 
@@ -47,6 +51,8 @@ private:
     std::vector<glm::vec2> controlPoints;
     std::vector<glm::vec2> transitionPoints;
     std::vector<glm::vec2> curvePoints;
+    std::vector<glm::vec2> hodographControlPoints;
+    std::vector<glm::vec2> hodographPoints;
 
     float t = 0.5;
     int highResNumSegments = 150;
@@ -55,6 +61,7 @@ private:
     float controlPointsSize = 12.f;
     float transitionPointsLineWidth = 3.5f;
     float bezierCurveLineWidth = 2.5f;
+    float hodographScaleFactor = 0.1f;
 
     GLint draggedPointIndex;
     GLuint vao[vaoSets::Count];
@@ -66,13 +73,14 @@ private:
     GLuint timeLocation;
     GLuint pulseSpeedLocation;
 
-    float waveAmplitude;
-    float waveFrequency;
-    float pulseSpeed;
+    float waveAmplitude = 0.f;
+    float waveFrequency = 0.f;
+    float pulseSpeed = 0.f;
 
     GLuint controlPointShaderProgram;
     GLuint bezierCurveShaderProgram;
     GLuint transitionPointsShaderProgram;
+    GLuint hodographControlPointsShaderProgram;
 };
 
 #endif // VERTEX_MANAGER_H

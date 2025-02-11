@@ -12,6 +12,7 @@ VertexManager::VertexManager()
     controlPointShaderProgram = Utils::createShaderProgram("./Shaders/ControlPoints/vert_shader.vert", "./Shaders/ControlPoints/frag_shader.frag");
     bezierCurveShaderProgram = Utils::createShaderProgram("./Shaders/BezierCurve/vert_shader.vert", "./Shaders/BezierCurve/frag_shader.frag");
     transitionPointsShaderProgram = Utils::createShaderProgram("./Shaders/TransitionPoints/transition_points.vert", "./Shaders/TransitionPoints/transition_points.frag");
+    hodographControlPointsShaderProgram = Utils::createShaderProgram("./Shaders/HodographControlPoints/vert_shader.vert", "./Shaders/HodographControlPoints/frag_shader.frag");
 
     glGenVertexArrays(vaoSets::Count, vao);
     glGenBuffers(vaoSets::Count, vbo);
@@ -19,6 +20,8 @@ VertexManager::VertexManager()
     setupVAOs(vao[vaoSets::ControlPoints], vbo[0]);
     setupVAOs(vao[vaoSets::TransitionPoints], vbo[1]);
     setupVAOs(vao[vaoSets::BezierCurve], vbo[2]);
+    setupVAOs(vao[vaoSets::Hodograph], vbo[3]);
+    setupVAOs(vao[vaoSets::HodographControlPoints], vbo[4]);
 
     waveAmplitudeLocation = glGetUniformLocation(bezierCurveShaderProgram, "waveAmplitude");
     waveFrequencyLocation = glGetUniformLocation(bezierCurveShaderProgram, "waveFrequency");
@@ -53,6 +56,8 @@ void VertexManager::addImguiTabs()
             controlPoints.clear();
             transitionPoints.clear();
             curvePoints.clear();
+            hodographControlPoints.clear();
+            hodographPoints.clear();
             for (int i = 0; i < vaoSets::Count; ++i)
                 updateVBO(vaoSets(i));
         }
@@ -79,6 +84,15 @@ void VertexManager::addImguiTabs()
 
         ImGui::EndTabItem();
     }
+    if (ImGui::BeginTabItem("Hodograph"))
+    {
+        if (ImGui::SliderFloat("Scale Factor", &hodographScaleFactor, 0.f, 1.0f))
+        {
+            calculateHodograph();
+            updateVBO(vaoSets::HodographControlPoints);
+        }
+        ImGui::EndTabItem();
+    }
     if (ImGui::BeginTabItem("Animate"))
     {
         ImGui::Text("Oscilations");
@@ -102,9 +116,37 @@ void VertexManager::calculateBezierCurve(int segments)
     curvePoints.push_back(MathUtils::evaluateBezier(controlPoints, 1.f));
 }
 
+void VertexManager::calculateHodograph()
+{
+    if (controlPoints.size() < 2)
+        return;
+
+    hodographPoints.clear();
+    hodographControlPoints.clear();
+
+    int n = controlPoints.size() - 1;
+    for (size_t i = 0; i < controlPoints.size() - 1; ++i)
+        hodographControlPoints.push_back(static_cast<float>(n) * (controlPoints[i + 1] - controlPoints[i]));
+
+    // Downscale or upscale the hodograph to fit it inside the screen
+    for (auto &point : hodographControlPoints)
+        point *= this->hodographScaleFactor;
+
+    // Compute hodograph curve points
+    int segments = highResNumSegments;
+    float step = 1.0f / segments;
+    for (float t = 0.0f; t <= 1.0f; t += step)
+        hodographPoints.push_back(MathUtils::evaluateBezier(hodographControlPoints, t));
+    hodographPoints.push_back(MathUtils::evaluateBezier(hodographControlPoints, 1.f));
+
+    // Update VBO
+    updateVBO(vaoSets::Hodograph);
+}
+
 void VertexManager::recalculateAllVertices()
 {
     this->transitionPoints = MathUtils::getBezierTransitionPoints(controlPoints, t);
+    calculateHodograph();
     if (draggedPointIndex != NO_DRAG)
         calculateBezierCurve(lowResNumSegments);
     else
@@ -147,6 +189,10 @@ void VertexManager::updateVBO(vaoSets loc)
         glBufferData(GL_ARRAY_BUFFER, transitionPoints.size() * sizeof(glm::vec2), transitionPoints.data(), GL_DYNAMIC_DRAW);
     else if (loc == VertexManager::vaoSets::BezierCurve)
         glBufferData(GL_ARRAY_BUFFER, curvePoints.size() * sizeof(glm::vec2), curvePoints.data(), GL_DYNAMIC_DRAW);
+    else if (loc == VertexManager::vaoSets::Hodograph)
+        glBufferData(GL_ARRAY_BUFFER, hodographPoints.size() * sizeof(glm::vec2), hodographPoints.data(), GL_DYNAMIC_DRAW);
+    else if (loc == VertexManager::vaoSets::HodographControlPoints)
+        glBufferData(GL_ARRAY_BUFFER, hodographControlPoints.size() * sizeof(glm::vec2), hodographControlPoints.data(), GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -167,7 +213,7 @@ void VertexManager::renderTransitionPoints() const
     glLineWidth(transitionPointsLineWidth);
     glBindVertexArray(vao[VertexManager::vaoSets::TransitionPoints]);
 
-    // Draw line stripes by levels so that they connect properly
+    // Draw line strips by levels so that they connect properly
     // Otherwise its' a mess because points from different levels of the De Casteljau algorithm connect, and they shouldn't most of the time
     std::size_t controlPointCount = controlPoints.size();
     int idx = 0, count = 0;
@@ -198,5 +244,26 @@ void VertexManager::renderCurve() const
 
     glBindVertexArray(vao[VertexManager::vaoSets::BezierCurve]);
     glDrawArrays(GL_LINE_STRIP, 0, curvePoints.size());
+    glBindVertexArray(0);
+}
+
+void VertexManager::renderHodograph() const
+{
+    glUseProgram(transitionPointsShaderProgram);
+    glLineWidth(transitionPointsLineWidth);
+    glBindVertexArray(vao[VertexManager::vaoSets::Hodograph]);
+    glDrawArrays(GL_LINE_STRIP, 0, hodographPoints.size());
+    glBindVertexArray(0);
+}
+
+void VertexManager::renderHodographControlPoints() const
+{
+    glUseProgram(hodographControlPointsShaderProgram);
+    glPointSize(6.f);
+    glLineWidth(2.f);
+    glBindVertexArray(vao[VertexManager::vaoSets::HodographControlPoints]);
+    glDrawArrays(GL_POINTS, 0, hodographControlPoints.size());
+    glDrawArrays(GL_LINE_STRIP, 0, hodographControlPoints.size());
+
     glBindVertexArray(0);
 }
