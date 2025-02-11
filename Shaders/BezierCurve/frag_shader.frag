@@ -19,6 +19,13 @@ vec3 hsv2rgb(float h, float s, float v)
 void main()
 {
     float hue = mod(time * 0.1, 1.0);
+    
+    // Skip more blue (hue range ~0.5 to 0.85)
+    if (hue > 0.5) {
+        hue += 0.35; // Jump over the blue region
+    }
+    hue = mod(hue, 1.0); // Keep within valid range
+
     vec3 color = hsv2rgb(hue, 1.0, 1.0);
     FragColor = vec4(color, 1.0);
 }
