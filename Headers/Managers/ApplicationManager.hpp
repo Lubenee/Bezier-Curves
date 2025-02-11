@@ -32,17 +32,6 @@ private:
 
     // Everything is rendered on the grid
     std::unique_ptr<Grid> grid;
-
-    // CAMERA
-    float cameraX = 0.f, cameraY = 0.f, cameraZ = 13.5f;
-    float fov = 1.0472f, nearPlane = 0.1f, farPlane = 1000.f, aspect;
-
-    // Projection & View Matrices & locations for shaders
-    glm::mat4 projMatrix, viewMatrix;
-    GLuint projLoc, viewLoc;
-
-    // Rendering Program
-    GLuint renderingProgram;
 };
 
 #endif // APPLICATION_MANAGER_H
