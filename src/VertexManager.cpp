@@ -13,6 +13,7 @@ VertexManager::VertexManager()
     bezierCurveShaderProgram = Utils::createShaderProgram("./Shaders/BezierCurve/vert_shader.vert", "./Shaders/BezierCurve/frag_shader.frag");
     transitionPointsShaderProgram = Utils::createShaderProgram("./Shaders/TransitionPoints/transition_points.vert", "./Shaders/TransitionPoints/transition_points.frag");
     hodographControlPointsShaderProgram = Utils::createShaderProgram("./Shaders/HodographControlPoints/vert_shader.vert", "./Shaders/HodographControlPoints/frag_shader.frag");
+    hodographCurveShaderProgram = Utils::createShaderProgram("./Shaders/Hodograph/vert_shader.vert", "./Shaders/Hodograph/frag_shader.frag");
 
     glGenVertexArrays(vaoSets::Count, vao);
     glGenBuffers(vaoSets::Count, vbo);
@@ -249,7 +250,7 @@ void VertexManager::renderCurve() const
 
 void VertexManager::renderHodograph() const
 {
-    glUseProgram(transitionPointsShaderProgram);
+    glUseProgram(hodographCurveShaderProgram);
     glLineWidth(transitionPointsLineWidth);
     glBindVertexArray(vao[VertexManager::vaoSets::Hodograph]);
     glDrawArrays(GL_LINE_STRIP, 0, hodographPoints.size());

@@ -81,6 +81,7 @@ private:
     GLuint bezierCurveShaderProgram;
     GLuint transitionPointsShaderProgram;
     GLuint hodographControlPointsShaderProgram;
+    GLuint hodographCurveShaderProgram;
 };
 
 #endif // VERTEX_MANAGER_H
