@@ -26,7 +26,11 @@ void ImGuiManager::init(GLFWwindow *window)
 
     // Initialize ImGui with GLFW and OpenGL
     ImGui_ImplGlfw_InitForOpenGL(this->window, true);
+#ifdef __APPLE__
+    ImGui_ImplOpenGL3_Init("#version 150");
+#else
     ImGui_ImplOpenGL3_Init("#version 130");
+#endif
 
     // Set ImGui style
     ImGui::StyleColorsDark();

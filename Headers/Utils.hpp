@@ -26,6 +26,12 @@ namespace Utils
         while (!ifs.eof())
         {
             std::getline(ifs, line);
+#ifdef __APPLE__
+            if (line.rfind("#version ", 0) == 0)
+            {
+                line = "#version 410 core";
+            }
+#endif
             content.append(line + '\n');
         }
         ifs.close();

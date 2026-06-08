@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(Bezier_Curves VERSION 1.0 LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(POLICY CMP0072)
     cmake_policy(SET CMP0072 NEW)
 endif()
@@ -10,6 +13,7 @@ find_package(glfw3 REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLEW REQUIRED glew)
+link_directories(${GLEW_LIBRARY_DIRS})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/)
 
@@ -54,5 +58,5 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ${GLEW_LIBRARIES}
     glfw
-    ${OPENGL_opengl_LIBRARY}
+    OpenGL::GL
 )
